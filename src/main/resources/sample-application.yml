@@ -1,0 +1,82 @@
+server:
+  port: 8061
+  
+spring:  
+  quartz:
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceId: AUTO
+        jobStore: 
+          isClustered: true
+          tablePrefix: qrtz_
+          
+          driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+    
+        threadPool:
+            threadCount: 5
+            
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+   
+    wait-for-jobs-to-complete-on-shutdown: true
+    
+#    org.quartz.scheduler.instanceName=ProcessAutomation
+#org.quartz.scheduler.instanceId=AUTO
+#org.quartz.scheduler.jmx.export=true
+#org.quartz.threadPool.class=org.quartz.simpl.SimpleThreadPool
+#org.quartz.threadPool.threadCount=10
+#org.quartz.threadPool.threadPriority=5
+#org.quartz.jobStore.class=org.quartz.impl.jdbcjobstore.JobStoreCMT
+#org.quartz.jobStore.dataSource=QuartzDS
+#org.quartz.jobStore.nonManagedTXDataSource=springNonTxDataSource.ProcessAutomation
+#org.quartz.jobStore.driverDelegateClass=org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+#org.quartz.jobStore.misfireThreshold=60000
+#org.quartz.jobStore.isClustered=true
+#org.quartz.jobStore.clusterCheckinInterval=20000
+            
+  data:
+    web:
+      pageable:
+        max-page-size: 100000
+        default-page-size: 100000 
+        
+  http:
+    log-request-details: true
+     
+  main:
+    allow-bean-definition-overriding: true
+                          
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/changelog-master.xml
+    
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://xxx.com:5432/xxx
+    username: xxx
+    password: xxx
+#    hikari:
+#      maximum-pool-size: 3
+    
+  jpa:
+    show-sql: false
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+        enable_lazy_load_no_trans: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+logging:
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID}){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"
+  level:
+    root: info    
+    org.springframework.*: info       
+    
