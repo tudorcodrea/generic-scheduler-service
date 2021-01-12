@@ -23,13 +23,13 @@ import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
+import org.quartz.Trigger.TriggerState;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,15 +72,14 @@ public class JobService implements IJobService {
 	}
 
 	/**
-	 * Get job status, based on the value of {@link TriggerState}
+	 * Creates a new job based on {@link SchedulerJobEntity}
 	 * 
-	 * @param jobName
-	 * @param jobGroup
-	 * @return String - status value of the job 
+	 * @param schedulerEntity
+	 * @return SchedulerJobEntity 
 	 * @throws SchedulerException
 	 */
 	@Override
-	public String addJob(SchedulerJobEntity schedulerEntity) throws Exception {
+	public SchedulerJobEntity addJob(SchedulerJobEntity schedulerEntity) throws Exception {
 
 		JobDetail jobDetail = createJobDetail(schedulerEntity);
 		Trigger jobTrigger = null;
@@ -101,14 +100,15 @@ public class JobService implements IJobService {
 		}
 
 //		getting first firing DATE
-		Date scheduledStartDate = scheduler.scheduleJob(jobDetail, jobTrigger);
+//		Date scheduledStartDate = 
+		scheduler.scheduleJob(jobDetail, jobTrigger);
 
 		scheduler.getListenerManager().addJobListener(new GenericJobListener(jobHistoryService));
 		scheduler.getListenerManager().addSchedulerListener(new GenericSchedulerListener());
 
-		schedulerRepository.save(schedulerEntity);
+		SchedulerJobEntity addedJob = schedulerRepository.save(schedulerEntity);
 
-		return "Job starts at: " + scheduledStartDate.toString();
+		return addedJob;
 	}
 
 	/**
@@ -132,19 +132,8 @@ public class JobService implements IJobService {
 	 * @throws SchedulerException
 	 */
 	@Override
-	public String getAllScheduledJobs() throws SchedulerException {
-
-		StringBuilder retVal = new StringBuilder();
-		
-		List<JobExecutionContext> jobContexts = scheduler.getCurrentlyExecutingJobs();
-		
-		jobContexts.forEach(jc -> {
-			JobDetail jobDetail = jc.getJobDetail();
-			retVal.append(jobDetail.getJobDataMap().get("jobName"));
-			retVal.append(";");
-		});
-		
-		return retVal.toString();
+	public List<SchedulerJobEntity> getAllScheduledJobs() throws SchedulerException {
+		return schedulerRepository.findAll();
 	}
 
 	/**
@@ -153,7 +142,7 @@ public class JobService implements IJobService {
 	 * @throws SchedulerException
 	 */
 	@Override
-	public void pauseAllJob() throws SchedulerException {
+	public void pauseAllJobs() throws SchedulerException {
 		scheduler.pauseAll();
 	}
 
@@ -213,23 +202,24 @@ public class JobService implements IJobService {
 	 * Delete a scheduled job
 	 * 
 	 * @param jobEntity
-	 * @return String - the result of the action
+	 * @return SchedulerJobEntity - the result of the action
 	 * @throws SchedulerException
+	 * @throws GenericSchedulerException 
 	 */
 	@Override
-	public String deleteJob(SchedulerJobEntity jobEntity) throws SchedulerException {
+	public SchedulerJobEntity deleteJob(SchedulerJobEntity jobEntity) throws SchedulerException, GenericSchedulerException {
 
 		JobKey jobKey = new JobKey(jobEntity.getJobName(), jobEntity.getJobGroup());
 		JobDetail jobDetail = scheduler.getJobDetail(jobKey);
 		if (jobDetail == null) {
-			return "jobDetail is null";
+			throw new GenericSchedulerException("jobDetail cannot be found");
 		} else if (!scheduler.checkExists(jobKey)) {
-			return "jobKey is not exists";
+			throw new GenericSchedulerException("jobKey does not exist");
 		} else {
 			scheduler.deleteJob(jobKey);
 			schedulerRepository.deleteById(jobEntity.getId());
 
-			return "success";
+			return jobEntity;
 		}
 	}
 
@@ -241,13 +231,13 @@ public class JobService implements IJobService {
 	 * @throws Exception
 	 */
 	@Override
-	public String modifyJob(SchedulerJobEntity jobEntity) throws Exception {
+	public SchedulerJobEntity modifyJob(SchedulerJobEntity jobEntity) throws Exception {
 
-		String retVal = "";
+		SchedulerJobEntity retVal = new SchedulerJobEntity();
 
 		Optional<SchedulerJobEntity> existingJobEntityOpt = schedulerRepository.findById(jobEntity.getId());
 		if (!existingJobEntityOpt.isPresent()) {
-			return "job not exists";
+			throw new GenericSchedulerException("job not exists");
 		}
 
 		SchedulerJobEntity existingJobEntity = existingJobEntityOpt.get();
@@ -262,10 +252,9 @@ public class JobService implements IJobService {
 			boolean modifiedCron = modifyCronScheduledJob(jobEntity);
 
 			if (modifiedCron) {
-				updateSchedulerJobEntity(jobEntity);
-				retVal = "modified cron job";
+				retVal = updateSchedulerJobEntity(jobEntity);
 			} else {
-				retVal = "job or trigger not exists";
+				throw new GenericSchedulerException("job or trigger not exists");
 			}
 
 		} else {
@@ -273,10 +262,9 @@ public class JobService implements IJobService {
 			boolean modifiedSimple = modifySimpleScheduledJob(jobEntity, existingJobEntity);
 
 			if (modifiedSimple) {
-				updateSchedulerJobEntity(jobEntity);
-				retVal = "modified simple scheduler job";
+				retVal = updateSchedulerJobEntity(jobEntity);
 			} else {
-				retVal = "job or trigger not exists";
+				throw new GenericSchedulerException("cannot update job");
 			}
 		}
 
@@ -374,7 +362,9 @@ public class JobService implements IJobService {
 		return jobDataMap;
 	}
 	
-	private void updateSchedulerJobEntity(SchedulerJobEntity jobEntity) {
+	private SchedulerJobEntity updateSchedulerJobEntity(SchedulerJobEntity jobEntity) {
+		SchedulerJobEntity retVal = new SchedulerJobEntity();
+		
 		Optional<SchedulerJobEntity> optionalSchedulerJobEntity = schedulerRepository.findById(jobEntity.getId());
 		if (optionalSchedulerJobEntity.isPresent()) {
 
@@ -387,8 +377,10 @@ public class JobService implements IJobService {
 			jobEntityFromDB.setRepeatTime(jobEntity.getRepeatTime());
 			jobEntityFromDB.setStartTime(jobEntity.getStartTime());
 
-			schedulerRepository.save(jobEntityFromDB);
+			retVal = schedulerRepository.save(jobEntityFromDB);
 		}
+		
+		return retVal;
 	}
 
 	private boolean modifyCronScheduledJob(SchedulerJobEntity jobEntity) throws Exception {

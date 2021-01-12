@@ -1,12 +1,12 @@
 package org.community.scheduler.jobs;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import org.community.scheduler.entity.TextEntity;
 import org.community.scheduler.service.api.ITextService;
+import org.community.scheduler.util.Util;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -35,10 +35,10 @@ public class GenerateDataTextJob implements Job {
 
 		List<TextEntity> generatedList = new ArrayList<TextEntity>();
 
-		generatedList.add(createTextEntity(invokeParam, getNow()));
-		generatedList.add(createTextEntity(invokeParam, getNowSecond1()));
-		generatedList.add(createTextEntity(invokeParam, getNowSecond5()));
-		generatedList.add(createTextEntity(invokeParam, getNowSecond3()));
+		generatedList.add(createTextEntity(invokeParam, new Date()));
+		generatedList.add(createTextEntity(invokeParam, Util.getNowDatePlusSecondOffset(10)));
+		generatedList.add(createTextEntity(invokeParam, Util.getNowDatePlusSecondOffset(50)));
+		generatedList.add(createTextEntity(invokeParam, Util.getNowDatePlusSecondOffset(30)));
 
 		textService.insertList(generatedList);
 
@@ -48,49 +48,6 @@ public class GenerateDataTextJob implements Job {
 
 	private TextEntity createTextEntity(String name, Date date) {
 		return TextEntity.builder().textValue(name).textDate(date).build();
-	}
-
-	private Date getNow() {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Date());
-		cal.set(Calendar.MILLISECOND, 0);
-		if (log.isDebugEnabled()) {
-			log.debug("From date:" + cal.toString());
-		}
-		return cal.getTime();
-	}
-
-	private Date getNowSecond1() {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Date());
-		cal.set(Calendar.SECOND, 10);
-		cal.set(Calendar.MILLISECOND, 0);
-		if (log.isDebugEnabled()) {
-			log.debug("From date:" + cal.toString());
-		}
-		return cal.getTime();
-	}
-
-	private Date getNowSecond5() {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Date());
-		cal.set(Calendar.SECOND, 50);
-		cal.set(Calendar.MILLISECOND, 0);
-		if (log.isDebugEnabled()) {
-			log.debug("From date:" + cal.toString());
-		}
-		return cal.getTime();
-	}
-
-	private Date getNowSecond3() {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Date());
-		cal.set(Calendar.SECOND, 30);
-		cal.set(Calendar.MILLISECOND, 0);
-		if (log.isDebugEnabled()) {
-			log.debug("From date:" + cal.toString());
-		}
-		return cal.getTime();
 	}
 
 }

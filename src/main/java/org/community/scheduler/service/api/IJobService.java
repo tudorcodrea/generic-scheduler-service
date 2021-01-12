@@ -1,6 +1,9 @@
 package org.community.scheduler.service.api;
 
+import java.util.List;
+
 import org.community.scheduler.entity.SchedulerJobEntity;
+import org.community.scheduler.exception.GenericSchedulerException;
 import org.quartz.SchedulerException;
 
 /**
@@ -13,16 +16,17 @@ public interface IJobService {
 	 * Create a new task
 	 * 
 	 */
-	String addJob(SchedulerJobEntity schedulerEntity) throws Exception;
+	SchedulerJobEntity addJob(SchedulerJobEntity schedulerEntity) throws Exception;
 
 	/**
 	 * Delete a scheduled job
 	 * 
 	 * @param jobEntity
-	 * @return String - the result of the action
+	 * @return SchedulerJobEntity - the result of the action
 	 * @throws SchedulerException
+	 * @throws GenericSchedulerException 
 	 */
-	String deleteJob(SchedulerJobEntity jobEntity) throws SchedulerException;
+	SchedulerJobEntity deleteJob(SchedulerJobEntity jobEntity) throws SchedulerException, GenericSchedulerException;
 
 	/**
 	 * Resume a scheduled job
@@ -56,15 +60,15 @@ public interface IJobService {
 	 * 
 	 * @throws SchedulerException
 	 */
-	void pauseAllJob() throws SchedulerException;
+	void pauseAllJobs() throws SchedulerException;
 
 	/**
 	 * Obtaining all registered jobs in the Scheduler
 	 * 
-	 * @return String - all scheduled jobs separated by ; character
+	 * @return List<SchedulerJobEntity> - all scheduled jobs separated by ; character
 	 * @throws SchedulerException
 	 */
-	String getAllScheduledJobs() throws SchedulerException;
+	List<SchedulerJobEntity> getAllScheduledJobs() throws SchedulerException;
 
 	/**
 	 * Get job status, based on the value of {@link TriggerState}
@@ -80,9 +84,9 @@ public interface IJobService {
 	 * Change/Modify a registered job
 	 * 
 	 * @param jobEntity
-	 * @return String - the result of the action
+	 * @return SchedulerJobEntity - the resulted job of the action
 	 * @throws Exception
 	 */
-	String modifyJob(SchedulerJobEntity jobEntity) throws Exception;
+	SchedulerJobEntity modifyJob(SchedulerJobEntity jobEntity) throws Exception;
 
 }
