@@ -9,17 +9,16 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.community.scheduler.entity.SchedulerJobEntity;
 import org.community.scheduler.exception.GenericSchedulerException;
-import org.community.scheduler.jobs.GenerateDataTextJob;
-import org.community.scheduler.jobs.LongBlankJob;
-import org.community.scheduler.jobs.TextJob;
 import org.community.scheduler.jobs.listener.GenericJobListener;
 import org.community.scheduler.jobs.listener.GenericSchedulerListener;
 import org.community.scheduler.repository.api.ISchedulerJobRepository;
 import org.community.scheduler.service.api.IJobHistoryService;
 import org.community.scheduler.service.api.IJobService;
+import org.community.scheduler.util.JobRegistry;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
+import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -45,6 +44,9 @@ import lombok.extern.log4j.Log4j2;
 public class JobService implements IJobService {
 
 	@Autowired
+	private JobRegistry jobRegistry;
+	
+	@Autowired
 	@Qualifier("scheduler")
 	private Scheduler scheduler;
 	
@@ -66,7 +68,7 @@ public class JobService implements IJobService {
 			try {
 				this.addJob(sje);
 			} catch (Exception e) {
-				log.error("Could not restart already registered job: " + sje.toString() + " ERROR: " + e.getMessage());
+				log.error("Could not restart already registered job: " + sje.toString() + " ERROR: " + e);
 			}
 		});
 	}
@@ -271,37 +273,36 @@ public class JobService implements IJobService {
 		return retVal;
 	}
 
+	/**
+	 * Uses a generic way of determining the Job type. If no match is found,
+	 * an Exception is thrown
+	 * 
+	 * @param SchedulerJobEntity
+	 * @return JobDetail
+	 * @throws Exception
+	 */
 	private JobDetail createJobDetail(SchedulerJobEntity schedulerEntity) throws Exception {
 
-		JobDetail JobDetail = null;
-		// Build job information
-//      jobGroup = JobType (the job class name declared)
-		if ("TextJob".equals(schedulerEntity.getJobGroup())) {
+		JobDetail jobDetail = null;
+		JobDataMap jobDataMap = createJobDataMap(schedulerEntity.getJobName(), schedulerEntity.getInvokeParam());
 
-			JobDataMap jobDataMap = createJobDataMap(schedulerEntity.getJobName(), schedulerEntity.getInvokeParam());
-
-			JobDetail = JobBuilder.newJob(TextJob.class)
-					.withIdentity(schedulerEntity.getJobName(), schedulerEntity.getJobGroup()).setJobData(jobDataMap)
-					.requestRecovery().build();
-
-		} else if ("LongBlankJob".equals(schedulerEntity.getJobGroup())) {
-			JobDataMap jobDataMap = createJobDataMap(schedulerEntity.getJobName(), schedulerEntity.getInvokeParam());
-
-			JobDetail = JobBuilder.newJob(LongBlankJob.class)
-					.withIdentity(schedulerEntity.getJobName(), schedulerEntity.getJobGroup()).setJobData(jobDataMap)
-					.requestRecovery().build();
-		} else if ("GenerateDataTextJob".equals(schedulerEntity.getJobGroup())) {
-			JobDataMap jobDataMap = createJobDataMap(schedulerEntity.getJobName(), schedulerEntity.getInvokeParam());
-
-			JobDetail = JobBuilder.newJob(GenerateDataTextJob.class)
-					.withIdentity(schedulerEntity.getJobName(), schedulerEntity.getJobGroup()).setJobData(jobDataMap)
-					.requestRecovery().build();
-		} else {
-			throw new GenericSchedulerException("Unrecognized job type - job group does not match with existing jobs");
-		}
-		return JobDetail;
+		Class<? extends Job> cls = jobRegistry.findJobByName(schedulerEntity.getJobGroup()).orElseThrow();
+		
+		jobDetail = JobBuilder.newJob(cls)
+				.withIdentity(schedulerEntity.getJobName(), schedulerEntity.getJobGroup()).setJobData(jobDataMap)
+				.requestRecovery().build();
+		
+		return jobDetail;
 	}
 	
+	/**
+	 * Defines a Simple Job Trigger 
+	 * 
+	 * @param schedulerEntity
+	 * @param jobDetail
+	 * @return Trigger
+	 * @throws ParseException
+	 */
 	private Trigger createSimpleJob(SchedulerJobEntity schedulerEntity, JobDetail jobDetail) throws ParseException {
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -325,6 +326,12 @@ public class JobService implements IJobService {
 				.withDescription(schedulerEntity.getJobName()).withSchedule(simpleScheduleBuilder).build();
 	}
 
+	/**
+	 * @param schedulerEntity
+	 * @param jobDetail
+	 * @return CronTrigger
+	 * @throws ParseException
+	 */
 	private CronTrigger createCronJob(SchedulerJobEntity schedulerEntity, JobDetail jobDetail)
 			throws ParseException {
 
