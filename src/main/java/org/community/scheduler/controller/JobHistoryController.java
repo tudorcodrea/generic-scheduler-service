@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Auditing the registered scheduled jobs
@@ -16,18 +17,19 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author tudor.codrea
  *
  */
+@RestController
 @RequestMapping("/scheduler/history")
 public class JobHistoryController {
 
 	@Autowired
 	private IJobHistoryService jobHistoryService;
-
+	
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public List<SchedulerJobHistory> getAll() {
 		return jobHistoryService.getAll();
 	}
 
-	@RequestMapping(value = "/", method = RequestMethod.GET)
+	@RequestMapping(value = "/job", method = RequestMethod.GET)
 	public SchedulerJobHistory getLastRunByJobName(@RequestParam("jobName") String jobName) {
 
 		Optional<SchedulerJobHistory> lastRunByNameOptional = jobHistoryService.getLastRunByName(jobName);

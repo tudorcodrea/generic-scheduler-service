@@ -11,28 +11,34 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 @Configuration
+@ComponentScan("org.community.scheduler.config")
 public class SchedulerConfig {
 
 	@Autowired
 	private QuartzProperties quartzProperties;
+	
+	@Autowired
+	private GenericSchedulerProperties genericSchedulerProperties;
 
 	@Autowired
 	private DataSource dataSource;
 
 	@Autowired
 	private QuartzJobFactory jobFactory;
-
+	
 	@Bean
 	public SchedulerFactoryBean schedulerFactoryBean() throws IOException {
 
-		// Get configuration properties if declared
 		Properties properties = new Properties();
 		properties.putAll(quartzProperties.getProperties());
-		properties.put("org.quartz.jobStore.driverDelegateClass", "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate");
+		
+//		it's redundant but needed because of issues from spring quartz library
+		properties.put("org.quartz.jobStore.driverDelegateClass", genericSchedulerProperties.getDriverDelegateClass());
 
 		SchedulerFactoryBean factory = new SchedulerFactoryBean();
 		factory.setOverwriteExistingJobs(true);

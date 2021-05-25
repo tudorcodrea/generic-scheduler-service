@@ -6,18 +6,19 @@ import org.quartz.SchedulerException;
 import org.quartz.SchedulerListener;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import lombok.extern.log4j.Log4j2;
 
 /**
  * @author tudor.codrea
  *
  */
 @Component
-@Log4j2
 public class GenericSchedulerListener implements SchedulerListener {
 
+	private Logger log = LoggerFactory.getLogger(GenericSchedulerListener.class);
+	
 	@Override
 	public void jobScheduled(Trigger trigger) {
 		String jobName = trigger.getJobDataMap().getString("jobName");

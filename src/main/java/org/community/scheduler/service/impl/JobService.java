@@ -31,18 +31,19 @@ import org.quartz.Trigger;
 import org.quartz.Trigger.TriggerState;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.log4j.Log4j2;
-
 @Service
-@Log4j2
 public class JobService implements IJobService {
 
+	private Logger log = LoggerFactory.getLogger(JobService.class);
+	
 	@Autowired
 	private JobRegistry jobRegistry;
 	

@@ -9,22 +9,6 @@ import java.util.Date;
  */
 public class Util {
 
-	private static final String[] searchPackages = { "org.community.scheduler.jobs" };
-
-	public static Class<?> findClassByName(String name) throws ClassNotFoundException {
-		
-		for (int i = 0; i < searchPackages.length; i++) {
-			try {
-				return Class.forName(searchPackages[i] + "." + name);
-			} catch (ClassNotFoundException e) {
-				// not in this package, try another
-				// letting it run 
-			}
-		}
-
-		throw new ClassNotFoundException();
-	}
-
 	public static Date getNowDateMinuteOffset(int minuteOffset) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());

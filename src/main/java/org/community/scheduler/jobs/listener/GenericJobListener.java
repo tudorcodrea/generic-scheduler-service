@@ -8,16 +8,17 @@ import org.community.scheduler.service.api.IJobHistoryService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
-
-import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author tudor.codrea
  *
  */
-@Log4j2
 public class GenericJobListener implements JobListener {
 
+	private Logger log = LoggerFactory.getLogger(GenericJobListener.class);
+	
 	private IJobHistoryService jobHistoryService;
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss:SSS");
