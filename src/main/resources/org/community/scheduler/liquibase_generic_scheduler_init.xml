@@ -1,0 +1,80 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext 
+	http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+ 
+  <changeSet author="generic-scheduler" id="scheduler_job_history" runOnChange="true">
+        <createTable tableName="scheduler_job">
+            <column autoIncrement="true" name="id" remarks="scheduler_job" type="SERIAL">
+                <constraints primaryKey="true" primaryKeyName="scheduler_job_pkey"/>
+            </column>   
+            
+            <column name="job_name" type="VARCHAR(255)">
+            	<constraints nullable="false"/>
+            </column>
+            
+            <column name="job_group" type="VARCHAR(255)">
+            	<constraints nullable="false"/>
+            </column>
+            
+            <column name="job_class" type="VARCHAR(255)">
+            	<constraints nullable="false"/>
+            </column>
+            
+            <column name="cron_expression" type="VARCHAR(255)">
+            	<constraints nullable="false"/>
+            </column>
+            
+            <column name="start_time" type="VARCHAR(255)">
+            	<constraints nullable="false"/>
+            </column>
+            
+            <column name="repeat_time" type="numeric">
+            	<constraints nullable="false"/>
+            </column>
+            
+            <column name="repeat_count" type="numeric" defaultValueNumeric="0">
+            	<constraints nullable="false"/>
+            </column>
+            
+            <column name="cron_job" type="BOOLEAN" defaultValueBoolean="true">
+            	<constraints nullable="false"/>
+            </column> 
+            
+            <column name="invoke_param" type="VARCHAR(255)">
+            	<constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <createTable tableName="scheduler_job_history">
+            <column autoIncrement="true" name="id" remarks="scheduler_job_history" type="SERIAL">
+                <constraints primaryKey="true" primaryKeyName="scheduler_job_history_pkey"/>
+            </column>   
+            
+            <column name="job_name" type="VARCHAR(255)">
+            	<constraints nullable="false"/>
+            </column>
+            
+            <column name="start_time" type="VARCHAR(255)">
+            </column>
+            
+            <column name="end_time" type="VARCHAR(255)">
+            </column>
+            
+            <column name="last_run" type="BIGINT">
+            </column>
+            
+            <column name="status" type="VARCHAR(255)">
+            </column>
+            
+            <column name="exit_status" type="VARCHAR(255)">
+            </column>
+            
+            <column name="details" type="VARCHAR(255)">
+            </column>
+        </createTable>
+    </changeSet>    
+    
+</databaseChangeLog>
