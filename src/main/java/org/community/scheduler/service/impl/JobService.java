@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.community.scheduler.entity.SchedulerJobEntity;
 import org.community.scheduler.exception.GenericSchedulerException;
@@ -82,6 +84,7 @@ public class JobService implements IJobService {
 	 * @throws SchedulerException
 	 */
 	@Override
+	@Transactional
 	public SchedulerJobEntity addJob(SchedulerJobEntity schedulerEntity) throws Exception {
 
 		JobDetail jobDetail = createJobDetail(schedulerEntity);
@@ -210,6 +213,7 @@ public class JobService implements IJobService {
 	 * @throws GenericSchedulerException 
 	 */
 	@Override
+	@Transactional
 	public SchedulerJobEntity deleteJob(SchedulerJobEntity jobEntity) throws SchedulerException, GenericSchedulerException {
 
 		JobKey jobKey = new JobKey(jobEntity.getJobName(), jobEntity.getJobGroup());
@@ -234,6 +238,7 @@ public class JobService implements IJobService {
 	 * @throws Exception
 	 */
 	@Override
+	@Transactional
 	public SchedulerJobEntity modifyJob(SchedulerJobEntity jobEntity) throws Exception {
 
 		SchedulerJobEntity retVal = new SchedulerJobEntity();

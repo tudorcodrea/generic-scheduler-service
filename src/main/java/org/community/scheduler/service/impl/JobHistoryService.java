@@ -3,6 +3,8 @@ package org.community.scheduler.service.impl;
 import java.util.List;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.community.scheduler.entity.SchedulerJobHistory;
 import org.community.scheduler.repository.api.IJobHistoryRepository;
 import org.community.scheduler.service.api.IJobHistoryService;
@@ -31,14 +33,15 @@ public class JobHistoryService implements IJobHistoryService {
 	}
 
 	@Override
+	@Transactional
 	public SchedulerJobHistory insert(SchedulerJobHistory sjh) {
 		return repository.save(sjh);
 	}
 
 	@Override
+	@Transactional
 	public SchedulerJobHistory update(SchedulerJobHistory sjh) {
 		return repository.save(sjh);
 	}
-	
 
 }
