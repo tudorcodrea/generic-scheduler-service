@@ -15,7 +15,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "scheduler_job_history")
-public class SchedulerJobHistory implements Serializable {
+public class SchedulerJobHistoryEntity implements Serializable {
 
 	private static final long serialVersionUID = 8588692288383675791L;
 
@@ -44,11 +44,11 @@ public class SchedulerJobHistory implements Serializable {
 	@Column(name = "details")
 	private String details;
 
-	public SchedulerJobHistory() {
+	public SchedulerJobHistoryEntity() {
 
 	}
 
-	public SchedulerJobHistory(Integer id, String jobName, String startTime, String endTime, Long lastRun,
+	public SchedulerJobHistoryEntity(Integer id, String jobName, String startTime, String endTime, Long lastRun,
 			String status, String exitStatus, String details) {
 		super();
 		this.id = id;
@@ -152,7 +152,7 @@ public class SchedulerJobHistory implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SchedulerJobHistory other = (SchedulerJobHistory) obj;
+		SchedulerJobHistoryEntity other = (SchedulerJobHistoryEntity) obj;
 		if (details == null) {
 			if (other.details != null)
 				return false;

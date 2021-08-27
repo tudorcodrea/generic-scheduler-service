@@ -13,9 +13,9 @@ import org.community.scheduler.entity.SchedulerJobEntity;
 import org.community.scheduler.exception.GenericSchedulerException;
 import org.community.scheduler.jobs.listener.GenericJobListener;
 import org.community.scheduler.jobs.listener.GenericSchedulerListener;
-import org.community.scheduler.repository.api.ISchedulerJobRepository;
-import org.community.scheduler.service.api.IJobHistoryService;
-import org.community.scheduler.service.api.IJobService;
+import org.community.scheduler.repository.JobSchedulerRepository;
+import org.community.scheduler.service.api.JobHistoryService;
+import org.community.scheduler.service.api.JobService;
 import org.community.scheduler.util.JobRegistry;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
@@ -42,9 +42,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
-public class JobService implements IJobService {
+public class JobServiceImpl implements JobService {
 
-	private Logger log = LoggerFactory.getLogger(JobService.class);
+	private Logger log = LoggerFactory.getLogger(JobServiceImpl.class);
 	
 	@Autowired
 	private JobRegistry jobRegistry;
@@ -54,10 +54,10 @@ public class JobService implements IJobService {
 	private Scheduler scheduler;
 	
 	@Autowired
-	private IJobHistoryService jobHistoryService;
+	private JobHistoryService jobHistoryService;
 
 	@Autowired
-	private ISchedulerJobRepository schedulerRepository;
+	private JobSchedulerRepository schedulerRepository;
 
 	/**
 	 * Starting all jobs added to DB when the microservice has started

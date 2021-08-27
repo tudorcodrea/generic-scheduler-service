@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.community.scheduler.entity.SchedulerJobEntity;
-import org.community.scheduler.service.api.IJobService;
+import org.community.scheduler.service.api.JobService;
 import org.community.scheduler.util.rest.response.Response;
 import org.community.scheduler.util.rest.response.ResponseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/scheduler")
-public class SchedulerController {
+public class JobSchedulerController {
 
 	@Autowired
-	private IJobService jobService;
+	private JobService jobService;
 
 	// Add a job
 	@RequestMapping(value = "/", method = RequestMethod.POST)

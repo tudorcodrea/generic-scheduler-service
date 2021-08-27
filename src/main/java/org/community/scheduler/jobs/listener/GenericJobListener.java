@@ -3,8 +3,8 @@ package org.community.scheduler.jobs.listener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.community.scheduler.entity.SchedulerJobHistory;
-import org.community.scheduler.service.api.IJobHistoryService;
+import org.community.scheduler.entity.SchedulerJobHistoryEntity;
+import org.community.scheduler.service.api.JobHistoryService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
@@ -19,11 +19,11 @@ public class GenericJobListener implements JobListener {
 
 	private Logger log = LoggerFactory.getLogger(GenericJobListener.class);
 	
-	private IJobHistoryService jobHistoryService;
+	private JobHistoryService jobHistoryService;
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss:SSS");
 	
-	public GenericJobListener(IJobHistoryService jobHistoryService) {
+	public GenericJobListener(JobHistoryService jobHistoryService) {
 		this.jobHistoryService = jobHistoryService;
 	}
 
@@ -57,10 +57,10 @@ public class GenericJobListener implements JobListener {
 				+ getJobExecutionExceptionDetails(jobException));
 
 		StringBuilder sb = new StringBuilder();
-		SchedulerJobHistory jobHistory = null;
+		SchedulerJobHistoryEntity jobHistory = null;
 
 		if (context.getMergedJobDataMap().containsKey("jobHistory")) {
-			jobHistory = (SchedulerJobHistory) context.getMergedJobDataMap().get("jobHistory");
+			jobHistory = (SchedulerJobHistoryEntity) context.getMergedJobDataMap().get("jobHistory");
 		}
 
 		if (jobHistory != null) {
@@ -104,13 +104,13 @@ public class GenericJobListener implements JobListener {
 	}
 
 	private void createJobHistory(JobExecutionContext executionContext) {
-		SchedulerJobHistory jh = new SchedulerJobHistory();
+		SchedulerJobHistoryEntity jh = new SchedulerJobHistoryEntity();
 		jh.setJobName(executionContext.getJobDetail().getJobDataMap().getString("jobName"));
 		jh.setDetails(executionContext.getFireInstanceId());
 		jh.setStartTime(sdf.format(executionContext.getFireTime()));
 		jh.setStatus("Running");
 		try {
-			SchedulerJobHistory newJobHistory = this.jobHistoryService.insert(jh);
+			SchedulerJobHistoryEntity newJobHistory = this.jobHistoryService.insert(jh);
 			executionContext.getMergedJobDataMap().put("jobHistory", newJobHistory);
 		} catch (Exception e) {
 			log.error("Job history insert issue: ", e);

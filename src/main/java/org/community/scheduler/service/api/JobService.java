@@ -10,7 +10,7 @@ import org.quartz.SchedulerException;
  * @author tudor.codrea
  *
  */
-public interface IJobService {
+public interface JobService {
 
 	/**
 	 * Create a new task

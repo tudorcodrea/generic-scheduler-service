@@ -5,9 +5,9 @@ import java.util.Optional;
 
 import javax.transaction.Transactional;
 
-import org.community.scheduler.entity.SchedulerJobHistory;
-import org.community.scheduler.repository.api.IJobHistoryRepository;
-import org.community.scheduler.service.api.IJobHistoryService;
+import org.community.scheduler.entity.SchedulerJobHistoryEntity;
+import org.community.scheduler.repository.JobHistoryRepository;
+import org.community.scheduler.service.api.JobHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,30 +17,30 @@ import org.springframework.stereotype.Service;
  * @author tudor.codrea
  */
 @Service
-public class JobHistoryService implements IJobHistoryService {
+public class JobHistoryServiceImpl implements JobHistoryService {
 
 	@Autowired
-	private IJobHistoryRepository repository;
+	private JobHistoryRepository repository;
 
 	@Override
-	public Optional<SchedulerJobHistory> getLastRunByName(String jobName) {
+	public Optional<SchedulerJobHistoryEntity> getLastRunByName(String jobName) {
 		return repository.getLastRunByName(jobName);
 	}
 	
 	@Override
-	public List<SchedulerJobHistory> getAll() {
+	public List<SchedulerJobHistoryEntity> getAll() {
 		return repository.findAll();
 	}
 
 	@Override
 	@Transactional
-	public SchedulerJobHistory insert(SchedulerJobHistory sjh) {
+	public SchedulerJobHistoryEntity insert(SchedulerJobHistoryEntity sjh) {
 		return repository.save(sjh);
 	}
 
 	@Override
 	@Transactional
-	public SchedulerJobHistory update(SchedulerJobHistory sjh) {
+	public SchedulerJobHistoryEntity update(SchedulerJobHistoryEntity sjh) {
 		return repository.save(sjh);
 	}
 
